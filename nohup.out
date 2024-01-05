@@ -1,0 +1,52 @@
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib/python3.11/threading.py", line 1038, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.11/threading.py", line 975, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.11/dist-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/usr/local/lib/python3.11/dist-packages/django/core/management/commands/runserver.py", line 134, in inner_run
+    self.check(display_num_errors=True)
+  File "/usr/local/lib/python3.11/dist-packages/django/core/management/base.py", line 558, in check
+    raise SystemCheckError(msg)
+django.core.management.base.SystemCheckError: SystemCheckError: System check identified some issues:
+
+ERRORS:
+?: (4_0.E001) As of Django 4.0, the values in the CSRF_TRUSTED_ORIGINS setting must start with a scheme (usually http:// or https://) but found 64.227.150.79. See the release notes for details.
+
+System check identified 1 issue (0 silenced).
+/root/myproject/hola9DjangoLatest/backendapi/settings.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+January 04, 2024 - 18:34:32
+Django version 4.0.3, using settings 'backendapi.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+[04/Jan/2024 18:34:35] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:34:38] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:34:39] "POST /api/adsapi/allAdsByInerval HTTP/1.1" 200 56943939
+[04/Jan/2024 18:34:40] "POST /api/adsapi/allAdsByInerval HTTP/1.1" 200 56943939
+[04/Jan/2024 18:34:41] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:34:44] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:34:47] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:34:50] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:34:53] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:34:54] "POST /api/adsapi/allAdsByInerval HTTP/1.1" 200 56943939
+[04/Jan/2024 18:34:56] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:34:59] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:35:02] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:35:02] "POST /api/adsapi/allAdsByInerval HTTP/1.1" 200 56943939
+[04/Jan/2024 18:35:05] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:35:08] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:35:11] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:35:12] "POST /api/adsapi/allAdsByInerval HTTP/1.1" 200 56943939
+[04/Jan/2024 18:35:14] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:35:17] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:35:20] "POST /api/adsapi/categoryAdsByInterval HTTP/1.1" 200 2
+[04/Jan/2024 18:35:28] "POST /api/adsapi/allAdsByInerval HTTP/1.1" 200 56943939
