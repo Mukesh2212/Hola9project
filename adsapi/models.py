@@ -145,7 +145,13 @@ class Product(models.Model):
                 self.user.save()
 
             super().save(*args, **kwargs)
-            
+
+    def generate_qr_code_data(self):
+        # return "http://example.com/static/product-detail/" + str(self.id) + "/"
+        return "https://databytess.com/api/adsapi/productdetail/" + str(self.id) + "/"
+        # return "https://databytess.com/api/user/profile/"
+
+
     @classmethod
     def search(cls, search_term):
         return cls.objects.filter(

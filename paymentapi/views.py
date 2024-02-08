@@ -564,13 +564,30 @@ def verify_hash(data,rec_hash,accesskey,secretkey):
 
 from django.core import serializers
 from django.http import HttpResponse
+# class userTransData(APIView):
+# 	def post( self,request , format=None):
+# 		userID=request.data.get('userID')
+# 		s=TransactionDetails.objects.filter(userID_id=userID)
+# 		print(s)
+# 		data=serializers.serialize('json',s)
+# 		return HttpResponse(data, content_type='application/json')
 class userTransData(APIView):
-	def post( self,request , format=None):
-		userID=request.data.get('userID')
-		s=TransactionDetails.objects.filter(userID_id=userID)
-		print(s)
-		data=serializers.serialize('json',s)
-		return HttpResponse(data, content_type='application/json')
+    def post(self, request, format=None):
+        # Get the userID from the request data
+        userID = request.data.get('userID')
+
+        # Get the limit from the request data (default to None if not provided)
+        limit_str = request.data.get('limit', None)
+        limit = int(limit_str) if limit_str is not None else None
+
+        # Filter TransactionDetails by userID and apply the limit
+        queryset = TransactionDetails.objects.filter(userID_id=userID)[:limit]
+
+        # Serialize the queryset to JSON
+        data = serializers.serialize('json', queryset)
+
+        # Return the JSON response
+        return HttpResponse(data, content_type='application/json')
 
 # @api_view(['POST'])
 # def start_payment(request):

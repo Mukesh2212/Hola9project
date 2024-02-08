@@ -55,6 +55,35 @@ class UserRegistrationView(APIView):
     return Response({'token':token, 'msg':'Registration Successful'}, status=status.HTTP_201_CREATED)
 
 
+# class UserLoginView(APIView):
+#   renderer_classes = [UserRenderer]
+#   def post(self, request, format=None):
+#     serializer = UserLoginSerializer(data=request.data)
+#     serializer.is_valid(raise_exception=True)
+#     email = serializer.data.get('email')
+#     password = serializer.data.get('password')
+#     user = authenticate(email=email, password=password)
+#     if user is not None:
+#       token = get_tokens_for_user(user)
+#         # added this line for last login
+#       user_login_time, created = UserLoginTime.objects.get_or_create(user=user)
+
+#         # Store the previous login time
+#       previous_login_time = user_login_time.login_time
+
+#         # Update the login_time with the current time
+#       user_login_time.login_time = timezone.now()
+
+
+#         # Update the previous_login_time with the previous login time
+#       user_login_time.previous_login_time = previous_login_time
+
+#       user_login_time.save()
+
+#       return Response({'token':token, 'msg':'Login Success'}, status=status.HTTP_200_OK)
+#     else:
+#       return Response({'errors':{'non_field_errors':['Email or Password is not Valid']}}, status=status.HTTP_404_NOT_FOUND)
+
 class UserLoginView(APIView):
   renderer_classes = [UserRenderer]
   def post(self, request, format=None):
@@ -63,27 +92,79 @@ class UserLoginView(APIView):
     email = serializer.data.get('email')
     password = serializer.data.get('password')
     user = authenticate(email=email, password=password)
+    max_allowed_devices=3
     if user is not None:
+       # Check the number of active devices for the user
+      active_devices_count_before_increment = user.active_devices
+      # print("Active Devices Count before increment:", active_devices_count_before_increment)
+      # Log out the oldest session if the user has reached the device limit
+     
+      if active_devices_count_before_increment >= max_allowed_devices:
+        # Get the oldest session based on the login time
+         oldest_session = User.objects.filter(name=user.name).order_by('created_at').first()
+         if oldest_session:
+            print("Is Oldest session expired:", oldest_session.is_token_expired())
+            # Check if the oldest session has expired
+            if oldest_session.is_token_expired():
+                print("Oldest session has expired. Deleting...")
+                print("Deleted session info:", {
+            'token_value': oldest_session.token_key,
+            'expiration_time': oldest_session.token_expiration_time ,
+            'created_at': oldest_session.created_at,
+            'device_info': oldest_session.active_devices
+        })
+                oldest_session.delete()
+                print(oldest_session)
+                print("Oldest session has expired. Deleted session info:", oldest_session)
+               
+               
+            else:
+                print("Oldest session has not expired.")
+
+
+      # Genaerate Token for new User ####
       token = get_tokens_for_user(user)
-        # added this line for last login
-      user_login_time, created = UserLoginTime.objects.get_or_create(user=user)
+      print("Token Created:", token)
+
+
+       # Update the devices count for the user using F object
+       # Update the devices count for the user
+      # Increment the devices count for the user
+      user.active_devices += 1
+      user.save()
+
+
+      print("Active Devices Count after increment:", user.active_devices)
+      # Try to retrieve or create UserLoginTime
+      try:
+        user_login_time, created = UserLoginTime.objects.get_or_create(user=user)
+      except UserLoginTime.DoesNotExist:
+        # Handle the case where the user does not have a UserLoginTime record
+        user_login_time = None
+        created = False
+      # added this line for last login
+      if user_login_time is not None:
+        print("User Login Time:", user_login_time.login_time)
+
 
         # Store the previous login time
-      previous_login_time = user_login_time.login_time
+        previous_login_time = user_login_time.login_time
+
 
         # Update the login_time with the current time
-      user_login_time.login_time = timezone.now()
+        user_login_time.login_time = timezone.now()
 
 
         # Update the previous_login_time with the previous login time
-      user_login_time.previous_login_time = previous_login_time
+        user_login_time.previous_login_time = previous_login_time
 
-      user_login_time.save()
+
+        user_login_time.save()
+
 
       return Response({'token':token, 'msg':'Login Success'}, status=status.HTTP_200_OK)
     else:
       return Response({'errors':{'non_field_errors':['Email or Password is not Valid']}}, status=status.HTTP_404_NOT_FOUND)
-
 class UserProfileView(APIView):
   renderer_classes = [UserRenderer]
   permission_classes = [IsAuthenticated]
@@ -499,38 +580,97 @@ class lastLoginTime(APIView):
 #       # data = serializers.serialize('json', [last_login_datetime])
 #       return HttpResponse(data,content_type='application/json')  
  
+# from django.http import JsonResponse
+# from pytz import timezone as pytz_timezone  # Import pytz to work with time zones
+
+# class lastLoginTimeGet(APIView):
+#     def post(self, request):
+#         user_id = request.POST.get('user')
+#         try:
+#             user_login_time = UserLoginTime.objects.get(user_id=user_id)
+#             last_login_time = user_login_time.login_time
+            
+#             if last_login_time:
+#                 kolata_timezone = pytz_timezone('Asia/Kolkata')
+#                 last_login_time = last_login_time.astimezone(kolata_timezone)
+                
+#                 response_data = [
+#                     {
+#                         "model": "adsapi.lastlogin",
+#                         "pk": user_login_time.id,  # Assuming you want the primary key of UserLoginTime as 'pk'
+#                         "fields": {
+#                             "userlogin": str(user_id),  # Convert user_id to a string
+#                             "lastloginValue": last_login_time.strftime("%Y-%m-%d %H:%M:%S.%f"),
+#                         }
+#                     }
+#                 ]
+#             else:
+#                 response_data = {'message': 'No last login time available for this user.'}
+#             return JsonResponse(response_data, safe=False)
+#         except UserLoginTime.DoesNotExist:
+#             response_data = {'message': 'User not found.'}
+#             return JsonResponse(response_data, status=404)
+from django.utils import timezone
+import pytz
+from datetime import datetime
 from django.http import JsonResponse
 from pytz import timezone as pytz_timezone  # Import pytz to work with time zones
 
+
 class lastLoginTimeGet(APIView):
-    def post(self, request):
-        user_id = request.POST.get('user')
+    def post(self, request, format=None):
+        user_id = request.data.get("user_id")
+
+
+        if user_id is None:
+            return Response({"error": "User ID is missing"}, status=status.HTTP_400_BAD_REQUEST)
+
+
         try:
-            user_login_time = UserLoginTime.objects.get(user_id=user_id)
-            last_login_time = user_login_time.login_time
-            
-            if last_login_time:
-                kolata_timezone = pytz_timezone('Asia/Kolkata')
-                last_login_time = last_login_time.astimezone(kolata_timezone)
-                
-                response_data = [
-                    {
-                        "model": "adsapi.lastlogin",
-                        "pk": user_login_time.id,  # Assuming you want the primary key of UserLoginTime as 'pk'
-                        "fields": {
-                            "userlogin": str(user_id),  # Convert user_id to a string
-                            "lastloginValue": last_login_time.strftime("%Y-%m-%d %H:%M:%S.%f"),
-                        }
-                    }
-                ]
-            else:
-                response_data = {'message': 'No last login time available for this user.'}
-            return JsonResponse(response_data, safe=False)
-        except UserLoginTime.DoesNotExist:
-            response_data = {'message': 'User not found.'}
-            return JsonResponse(response_data, status=404)
+            user_id = int(user_id)
+        except ValueError:
+            return Response({"error": "Invalid user ID"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+        try:
+            user_instance = User.objects.get(id=user_id)
+            last_login_datetime, created = LastLogin.objects.get_or_create(userlogin=user_instance)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        except LastLogin.DoesNotExist:
+            last_login_datetime = LastLogin(userlogin=user_instance)
+
+
+        asia_kolkata = pytz.timezone('Asia/Kolkata')
+        current_time_kolkata = datetime.now(asia_kolkata)
+        current_datetime = current_time_kolkata.strftime('%Y-%m-%d %H:%M:%S.%f')
+
+
+        # Check if there's a previous login time
+        if last_login_datetime.lastloginValue:
+            # Update the lastloginValue field with the previous last login time
+            previous_last_login_time = last_login_datetime.lastloginValue
+            last_login_datetime.lastloginValue = previous_last_login_time
+        else:
+            # If there's no previous login time, set lastloginValue to the current time
+            last_login_datetime.lastloginValue = current_datetime
+
+
+        # Update the previous_login_time field with the current last login time
+        last_login_datetime.previous_login_time = current_datetime
+
+
+        last_login_datetime.save()
+
+
+        data = {
+            "userlogin": user_id,
+            "lastloginValue": last_login_datetime.lastloginValue,
+            # "previous_login_time": last_login_datetime.previous_login_time
+        }
+
+
+        return Response(data, status=status.HTTP_200_OK)
 
 
 

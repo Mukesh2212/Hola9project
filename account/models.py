@@ -3,6 +3,8 @@ from django.contrib.auth.models import BaseUserManager,AbstractBaseUser
 from django.core.validators import RegexValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import date
+from django.utils import timezone
+
 
 #  Custom User Manager
 class UserManager(BaseUserManager):
@@ -61,7 +63,21 @@ class User(AbstractBaseUser):
         max_length=255, blank=False,
         null=False, default=AUTH_PROVIDERS.get('email'))
   total_ads_posted = models.PositiveIntegerField(default=0)
+#### add fields for token expire and user login on 3 device not more than 3 #####
+  active_devices = models.PositiveIntegerField(default=0)
+  token_key = models.CharField(max_length=40, unique=True, null=True, blank=True)
+#   token_created_at = models.DateTimeField(null=True, blank=True)
+  token_expiration_time = models.DurationField(default=timezone.timedelta(seconds=1))
+  def is_token_expired(self):
+        if self.token_created_at is not None:
+            expiration_datetime = self.created_at + timezone.timedelta(seconds=self.token_expiration_time.total_seconds())
+            current_time = timezone.now()
+            return current_time > expiration_datetime
+        return True
 
+
+  def has_reached_device_limit(self):
+        return self.active_devices >= 3  # Assuming the limit is 3 devices
 
   objects = UserManager()
 

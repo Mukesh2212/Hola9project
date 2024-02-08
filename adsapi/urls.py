@@ -10,6 +10,10 @@ route.register("",ProductView,basename='productview')
 urlpatterns = [
     path('',include(route.urls)),
     #WishList URLS
+    path('productdetail/<int:pk>/', ProductDetail.as_view(), name='productdetail'),
+    path('qrcode', generate_qr_code, name='qrcode'),
+
+
     path('api/addwishlistitems/<int:pk>', AddtoWishListItemsView.as_view(),name='add-to-wishlist'),
     path('AdsMessage', AdsMessageName.as_view(),name='add-to-message'),
     path('AdsAdressLatLon', AdsAdressLatLonView.as_view(),name='add-to-address'),
@@ -52,7 +56,8 @@ urlpatterns = [
     path('SearchWeb',SearchWeb.as_view(),name='SearchWeb'),
     path('checkBusinessPlan',CheckBusinessPlan.as_view(),name='checkBusinessPlan'),
     path('businessAds',BusinessAds.as_view(),name='businessAds'),
-    path('businessProfile', BusinessProfiles.as_view(), name='businessProfile'),
+    path('businessProfile', BusinessProfiles.as_view({'get': 'list', 'post': 'create'}), name='businessProfile'),
+    path('businessProfileDetail/<int:pk>/', BusinessProfileDetail.as_view(), name='businessProfileDetail'),
     path('mybusinessPlan', MybusinessPlan.as_view(), name='mybusinessPlan'),
     path('checkVerified', CheckVerified.as_view(), name='checkVerified'),
     path('collectVisitPhoneNumber', CollectVisitPhoneNumber.as_view(), name='collectVisitPhoneNumber'),

@@ -12,15 +12,10 @@ SECRET_KEY = 'django-insecure-3dy!tq&dteytu=zfj2)k%*u0dt9ws&1(j8nsu!^3-3th5^*f^=
 
 DEBUG = True
 
-# settings.py
 
-# Add your domain and necessary hosts to ALLOWED_HOSTS
-ALLOWED_HOSTS = ['databytess.com', 'www.databytess.com', '127.0.0.1', 'localhost', '64.227.150.79']
+ALLOWED_HOSTS = ['74.208.100.174', 'databytess.com', '127.0.0.1', 'localhost']
 
-# Add trusted origins for CSRF protection
-# Ensure these are the domains making AJAX requests to your Django backend
-CSRF_TRUSTED_ORIGINS = ['https://databytess.com', 'http://64.227.150.79/']
-
+CSRF_TRUSTED_ORIGINS = ['https://databytess.com', 'http://127.0.0.1']
 
 
 

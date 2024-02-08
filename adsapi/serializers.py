@@ -7,6 +7,13 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
+    def update(self, instance, validated_data):
+        # Handle partial updates
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
+
  #Wishlist Serializers
 
 class WishListItemsTestSerializer(serializers.ModelSerializer):    
@@ -20,6 +27,12 @@ class BusinessProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = BusinessProfile
         fields = '__all__'
+    def update(self, instance, validated_data):
+        # Handle partial updates
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
 
 # class EmployeeLogin2Serializer2(serializers.ModelSerializer):
 #     class Meta:

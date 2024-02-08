@@ -19,15 +19,50 @@ from otp_reg.models import *
 from pagesapi.models import *
 from paymentapi.models import *
 from profileapi.models import * 
+from rest_framework import generics
+
 
 
 # from rest_framework import serializers
 # Create your views here.
 import ast
-
 class ProductView(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    
+    def get_queryset(self):
+        # Get the 'limit' parameter from the query parameters
+        limit = self.request.query_params.get('limit', None)
+
+        # Apply the limit if it's a valid positive integer
+        if limit is not None and limit.isdigit() and int(limit) > 0:
+            # return BusinessProfile.objects.all()[:int(limit)]
+            return Product.objects.all().order_by('-id')[:int(limit)]
+
+        else:
+            return Product.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    
+    def get_serializer(self, *args, **kwargs):
+        # Set partial argument based on the HTTP method
+        kwargs['partial'] = self.request.method in ['PATCH', 'PUT']
+        return super().get_serializer(*args, **kwargs)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({"detail": "Deleted successfully"}, status=status.HTTP_200_OK)
+# class ProductView(viewsets.ModelViewSet):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
 # from rest_framework import viewsets, pagination
 # from rest_framework.response import Response
 
@@ -52,6 +87,34 @@ class ProductView(viewsets.ModelViewSet):
 #         # Return the serialized data without the default keys
 #         return Response(serializer.data)
 
+@api_view(['GET', 'POST'])
+def generate_qr_code(request):
+    if request.method == 'POST':
+        product_id = request.data.get('product_id')
+
+        if not product_id:
+            return Response({'error': 'Product ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Assuming Product model has a method to generate a unique identifier for the QR code
+        qr_code_data = Product.objects.get(id=product_id).generate_qr_code_data()
+
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(qr_code_data)
+        qr.make(fit=True)
+
+        img = qr.make_image(fill_color="black", back_color="white")
+        response = HttpResponse(content_type="image/png")
+        img.save(response, "PNG")
+
+        return response
+    else:
+        # If the request method is not POST, you may want to handle it accordingly.
+        return Response({'detail': f'Method "{request.method}" not allowed.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 #WishList Views
@@ -1786,10 +1849,43 @@ class BusinessAds(APIView):
         return HttpResponse(json.dumps(s1), content_type='application/json')
 from rest_framework import generics
 
-class BusinessProfiles(generics.ListCreateAPIView):
+# class BusinessProfiles(generics.ListCreateAPIView):
+#     queryset = BusinessProfile.objects.all()
+#     serializer_class = BusinessProfileSerializer
+class BusinessProfiles(viewsets.ModelViewSet):
     queryset = BusinessProfile.objects.all()
     serializer_class = BusinessProfileSerializer
 
+    def get_queryset(self):
+        # Get the 'limit' parameter from the query parameters
+        limit = self.request.query_params.get('limit', None)
+
+        # Apply the limit if it's a valid positive integer
+        if limit is not None and limit.isdigit() and int(limit) > 0:
+            # return BusinessProfile.objects.all()[:int(limit)]
+            return BusinessProfile.objects.all().order_by('-id')[:int(limit)]
+
+        else:
+            return BusinessProfile.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+class BusinessProfileDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BusinessProfile.objects.all()
+    serializer_class = BusinessProfileSerializer
+    
+    def get_serializer(self, *args, **kwargs):
+        # Set partial argument based on the HTTP method
+        kwargs['partial'] = self.request.method in ['PATCH', 'PUT']
+        return super().get_serializer(*args, **kwargs)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({"detail": "Deleted successfully"}, status=status.HTTP_200_OK)
 
 class MybusinessPlan(APIView):
     def post( self,request , format=None):
