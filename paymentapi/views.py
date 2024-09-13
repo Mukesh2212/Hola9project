@@ -139,25 +139,25 @@ class callback_class(APIView):
 		# response = request.POST
 		reponse1=request.data
 		print("----------------reponse",reponse1)
-		if len(response["layer_payment_id"]) == 0:
+		if len(reponse1["layer_payment_id"]) == 0:
 			error = "Invalid payment id"
 		if len(error)==0:
 			vhash=dict()
-			vhash["amount"] =response["layer_order_amount"]
-			vhash["id"]=response["layer_pay_token_id"]
-			vhash["mtx"]=response["tranid"]
-			if not verify_hash(vhash,response["hash"],accesskey,secretkey):
+			vhash["amount"] =reponse1["layer_order_amount"]
+			vhash["id"]=reponse1["layer_pay_token_id"]
+			vhash["mtx"]=reponse1["tranid"]
+			if not verify_hash(vhash,reponse1["hash"],accesskey,secretkey):
 				error="Invalid payment response...Hash mismatch"
 		if len(error) == 0:
-			payment_data = get_payment_details(response["layer_payment_id"],accesskey,secretkey,environment)
+			payment_data = get_payment_details(reponse1["layer_payment_id"],accesskey,secretkey,environment)
 	
 		if payment_data:
 			for k in payment_data.keys():
 				if k == "error":
 					error = payment_data[k]
-		if len(error) == 0 and payment_data["payment_token"]["id"] != response["layer_pay_token_id"]:
+		if len(error) == 0 and payment_data["payment_token"]["id"] != reponse1["layer_pay_token_id"]:
 			error = "Layer: received layer_pay_token_id and collected layer_pay_token_id doesnt match"
-		if len(error) == 0 and payment_data["amount"] != response["layer_order_amount"]:
+		if len(error) == 0 and payment_data["amount"] != reponse1["layer_order_amount"]:
 			error = "Layer: received amount and collected amount doesnt match"
 		if len(error) == 0 and payment_data["payment_token"]["status"] != "paid":
 			status = "Transaction failed..."+payment_data["payment_error_description"]

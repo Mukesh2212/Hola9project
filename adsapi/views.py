@@ -1671,7 +1671,7 @@ class approveAds(APIView):
             data=serializers.serialize('json',s)
         else:
             s=Product.objects.get(pk=idValue)
-            s.is_active=true
+            s.is_active=True
             s.save()
             data="success"
         return HttpResponse(data, content_type='application/json')
