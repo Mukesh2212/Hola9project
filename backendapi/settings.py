@@ -93,6 +93,17 @@ DATABASES = {
 }
 }
 
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',  
+        'NAME': 'holatwo', 
+        'USER': 'root', 
+        'PASSWORD': 'password',
+        'HOST': 'localhost',  
+        'PORT': '3306', 
+    }
+}
 CORS_ALLOW_ALL_ORIGINS = True
 
 # Password validation

@@ -34,7 +34,7 @@ class UserManager(BaseUserManager):
           email,
           password=password,
           name=name,
-          phoneNumber="909090909090",
+          phoneNumber="7656465767",
           tc=tc,
       )
       user.is_admin = True
@@ -152,7 +152,7 @@ class JobApply(models.Model):
     email = models.CharField(max_length=50, null = True, blank = True)
     title = models.CharField(max_length=20,null = True,blank=True)
     Introduction = models.CharField(max_length=255, null=True,blank=True)
-    filename =models.FileField(max_length=255,blank=True ,null=True)
+    filename = models.TextField(blank=True ,null=True)
     created_at = models.CharField(max_length=150,null=False,blank=False ,default=datetime.datetime.now().strftime('%Y-%m-%d'))
 class JobsRequired(models.Model):
     profile = models.CharField(max_length=200)
@@ -167,7 +167,7 @@ class JobsRequired(models.Model):
 
 
 class ContactForm(models.Model):
-    description = models.TextField(max_length=300)
+    description = models.TextField(max_length=30)
     name = models.CharField(max_length=255)
     phone_number = models.IntegerField()
     add_file = models.FileField(upload_to='', blank=False, null=False)

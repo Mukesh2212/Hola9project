@@ -10,7 +10,7 @@ class TransationIdone(models.Model):
     message=models.CharField(max_length=232)
     # adsid=models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
     userid=models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    ProductData=models.CharField(max_length=100,null=True)
+    productdata=models.CharField(max_length=100,null=True,blank=True)
     date_created=models.CharField(max_length=550, default=datetime.datetime.now().strftime('%Y-%m-%d'))
 
 class Order(models.Model):
